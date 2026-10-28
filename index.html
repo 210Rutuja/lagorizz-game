@@ -1,0 +1,791 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lagorizz Game</title>
+
+<style>
+:root {
+  --ink:#171923;
+  --coral:#ff5968;
+  --yellow:#ffb900;
+  --teal:#4bc8c2;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  padding:12px;
+  font-family:Arial,sans-serif;
+  color:var(--ink);
+  background:linear-gradient(150deg,#ffc879,#ff9d86,#f16c91);
+}
+.app { width:min(100%,1000px);margin:auto; }
+.brand { display:flex;align-items:center;gap:12px;margin-bottom:15px; }
+.logo {
+  flex-shrink:0;width:45px;height:45px;
+  border:3px solid var(--ink);border-radius:50%;
+  background:#ffb83f;box-shadow:3px 3px var(--ink);
+}
+h1 { margin:0;font-size:clamp(28px,6vw,42px); }
+.subtitle { margin:5px 0;font-size:12px;font-weight:bold; }
+.layout { display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px; }
+.panel {
+  padding:12px;margin-bottom:14px;background:#fff9ed;
+  border:3px solid var(--ink);border-radius:18px;
+  box-shadow:4px 5px var(--ink);min-width:0;
+}
+.menu { display:grid;gap:10px; }
+button {
+  padding:11px;color:var(--ink);background:white;
+  border:3px solid var(--ink);border-radius:999px;
+  box-shadow:2px 3px var(--ink);font-weight:900;
+  cursor:pointer;touch-action:manipulation;
+}
+button:active { transform:translate(2px,3px);box-shadow:none; }
+.bigbtn { width:100%;background:var(--coral); }
+.menu button:nth-child(2) { background:var(--teal); }
+.menu button:nth-child(3) { background:var(--yellow); }
+.menu button:nth-child(4) { background:#b7a0ff; }
+.menu button:nth-child(5) { background:#ffb900; }
+.stats { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px; }
+.pill {
+  padding:8px 3px;background:white;border:2px solid var(--ink);
+  border-radius:30px;text-align:center;font-size:12px;font-weight:bold;
+  overflow-wrap:anywhere;
+}
+.lives { margin:10px 0;color:var(--coral);font-size:22px; }
+.actions { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:12px; }
+.actions button { padding:9px 3px;font-size:11px; }
+.progress-label { display:flex;justify-content:space-between;gap:5px;margin-bottom:5px;font-size:11px;font-weight:bold; }
+.progress { height:12px;margin-bottom:10px;overflow:hidden;border:2px solid var(--ink);border-radius:20px; }
+.progress span { display:block;width:0;height:100%;background:var(--teal); }
+.canvas-wrap { width:100%;overflow:hidden;border:4px solid var(--ink);border-radius:16px; }
+canvas { display:block;width:100%;height:auto; }
+.message { min-height:18px;text-align:center;font-size:12px;font-weight:bold; }
+.below { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
+.pad { display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:220px;margin:auto; }
+.control { min-height:44px;border-radius:12px;font-size:19px; }
+.blank { visibility:hidden; }
+.gameButtons { display:flex;justify-content:center;align-items:center;gap:10px; }
+.throw { width:78px;height:78px;padding:5px;border-radius:50%;font-size:13px;background:var(--coral); }
+.help { text-align:center;font-size:11px;font-weight:bold; }
+.footer { padding:12px;background:#242b3b;color:white;border-radius:12px;text-align:center;font-size:11px; }
+.hidden { display:none!important; }
+input,select { max-width:100%;font-size:16px; }
+.nameInput {
+  width:100%;padding:12px;margin:8px 0 12px;
+  border:2px solid var(--ink);border-radius:10px;
+}
+#overlay {
+  position:fixed;inset:0;z-index:5;display:grid;
+  place-items:center;padding:16px;background:#171923bb;
+}
+.dialog {
+  width:min(100%,350px);padding:20px;background:#fff9ed;
+  border:3px solid var(--ink);border-radius:20px;
+  box-shadow:4px 5px var(--ink);text-align:center;
+}
+@media(max-width:650px) {
+  body { padding:8px; }
+  .layout { grid-template-columns:minmax(0,1fr); }
+  .menu { grid-template-columns:1fr 1fr; }
+  .menu button { font-size:12px;padding:10px 5px; }
+  .panel { padding:9px;margin-bottom:12px; }
+  .below { grid-template-columns:1fr 1fr; }
+  .stats { gap:4px; }
+  .pill { font-size:10px; }
+  .lives { font-size:20px; }
+  .actions button { font-size:10px; }
+}
+@media(max-width:360px) {
+  .below { grid-template-columns:1fr; }
+  .menu { grid-template-columns:1fr 1fr; }
+  .subtitle { font-size:10px; }
+  .logo { width:38px;height:38px; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+<header class="brand">
+  <div class="logo"></div>
+  <div>
+    <h1>Lagorizz</h1>
+    <p class="subtitle">A Traditional Indian Game · Seven Stones · Endless Fun</p>
+  </div>
+</header>
+
+<div class="layout">
+<aside>
+  <section class="panel menu" id="homeMenu">
+    <button class="bigbtn" id="playBtn">▷ PLAY GAME</button>
+    <button class="bigbtn" id="nameBtn">✎ PLAYER NAME</button>
+    <button class="bigbtn" id="rulesBtn">▣ RULES</button>
+    <button class="bigbtn" id="leaderBtn">♙ LEADERBOARD</button>
+    <button class="bigbtn" id="settingsBtn">⚙ SETTINGS</button>
+  </section>
+
+  <section class="panel hidden" id="namePanel">
+    <h3>Player Name</h3>
+    <label for="playerName">Enter your name:</label>
+    <input class="nameInput" id="playerName" maxlength="18"
+           placeholder="Type your name" autocomplete="off">
+    <button class="bigbtn" id="saveNameBtn">SAVE NAME</button>
+    <br><br>
+    <button class="bigbtn" id="nameBack">BACK</button>
+  </section>
+
+  <section class="panel hidden" id="rulesPanel">
+    <h3>How to Play</h3>
+    <p style="font-size:13px;line-height:1.7">
+      1. Move using WASD or arrow keys.<br>
+      2. Press THROW near the stack.<br>
+      3. Stones are collected automatically when you get close.<br>
+      4. Collect all seven stones to rebuild the stack.<br>
+      5. Avoid the bots!
+    </p>
+    <button class="bigbtn" id="rulesBack">BACK</button>
+  </section>
+
+  <section class="panel hidden" id="leaderPanel">
+    <h3>Leaderboard</h3>
+    <p>Player: <b id="leaderName">Player</b></p>
+    <p>Best score: <b id="bestScore">0</b></p>
+    <button class="bigbtn" id="leaderBack">BACK</button>
+  </section>
+
+  <section class="panel hidden" id="settingsPanel">
+    <h3>Settings</h3>
+    <select id="difficulty" style="width:100%;padding:10px;margin-bottom:12px">
+      <option value="easy">Easy — 1 very slow bot</option>
+      <option value="medium">Medium — 2 slow bots</option>
+      <option value="hard">Hard — 3 medium-speed bots</option>
+    </select>
+    <button class="bigbtn" id="settingsBack">SAVE & BACK</button>
+  </section>
+</aside>
+
+<main>
+<section class="panel">
+  <div class="stats">
+    <div class="pill" id="difficultyBadge">✦ EASY</div>
+    <div class="pill">⭐ <span id="score">0</span></div>
+    <div class="pill">◷ <span id="time">90</span>s</div>
+  </div>
+  <div class="lives" id="lives">♥ ♥ ♥ ♥ ♥</div>
+  <div class="actions">
+    <button id="pauseBtn">Ⅱ PAUSE</button>
+    <button id="restartBtn" style="background:#ffb900">⟳ RESTART</button>
+    <button id="homeBtn">⌂ HOME</button>
+  </div>
+  <div class="progress-label">
+    <span>Rebuild Progress</span>
+    <span id="progressText">0/7 · STACKS 0/3</span>
+  </div>
+  <div class="progress"><span id="progressBar"></span></div>
+  <div class="canvas-wrap">
+    <canvas id="game" width="960" height="540"></canvas>
+  </div>
+  <p class="message" id="message">Choose a difficulty and press PLAY GAME!</p>
+</section>
+
+<section class="panel below">
+  <div>
+    <div class="pad">
+      <button class="control blank" tabindex="-1" aria-hidden="true"></button>
+      <button class="control" data-move="up">↑</button>
+      <button class="control blank" tabindex="-1" aria-hidden="true"></button>
+      <button class="control" data-move="left">←</button>
+      <button class="control" data-move="down">↓</button>
+      <button class="control" data-move="right">→</button>
+    </div>
+    <p class="help">Move: WASD / arrows</p>
+  </div>
+  <div>
+    <div class="gameButtons">
+      <button class="control throw" id="throwBtn">➤<br>THROW</button>
+    </div>
+    <p class="help">Collect stones automatically</p>
+  </div>
+</section>
+</main>
+</div>
+
+<div class="footer">LAGORIZZ · Move, throw and rebuild!</div>
+
+<div id="overlay" class="hidden">
+  <div class="dialog">
+    <h2 id="dialogTitle">Game Paused</h2>
+    <p id="dialogText">Ready to continue?</p>
+    <button class="bigbtn" id="continueBtn">CONTINUE</button>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const canvas = $("game");
+const ctx = canvas.getContext("2d");
+const W = canvas.width, H = canvas.height;
+
+let playerName = localStorage.getItem("lagorizzName") || "Player";
+$("playerName").value = playerName;
+$("leaderName").textContent = playerName;
+
+const PLAYER_SPEED = 320;
+let running = false, paused = false;
+let chaseTime = 0;
+let score = 0, timeLeft = 90, lives = 5, stacks = 0;
+let stonesDown = false, cooldown = 0, difficulty = "easy";
+let best = Number(localStorage.getItem("lagorizzBest") || 0);
+$("bestScore").textContent = best;
+
+const player = {x:245,y:395,color:"#21d7d0"};
+let bots = [];
+
+const botSettings = {
+  easy:{count:1,speed:35},
+  medium:{count:2,speed:65},
+  hard:{count:3,speed:100}
+};
+
+const botColors = ["#8c63e8","#ff5968","#ff8c42"];
+const botNames = ["BOT 1","BOT 2","BOT 3"];
+
+function createBots() {
+  const settings = botSettings[difficulty];
+  bots = [];
+
+  for(let i=0;i<settings.count;i++) {
+    bots.push({
+      x:680+(i%2)*90,
+      y:320+i*55,
+      speed:settings.speed,
+      color:botColors[i],
+      name:botNames[i],
+      cooldown:0
+    });
+  }
+}
+
+const stones = [];
+
+function resetStones() {
+  stones.length=0;
+
+  const colors=["#ff5968","#ffb900","#4bc8c2","#8c63e8",
+    "#ff8c42","#58a6ff","#ff5968"];
+
+  for(let i=0;i<7;i++) {
+    stones.push({
+      x:480,y:397-i*17,w:48-i*3,h:13,
+      color:colors[i],picked:false
+    });
+  }
+}
+
+resetStones();
+
+function message(text) {
+  $("message").textContent=text;
+}
+
+function updateUI() {
+  $("score").textContent=score;
+  $("time").textContent=Math.max(0,Math.ceil(timeLeft));
+
+  const picked=stones.filter(s=>s.picked).length;
+
+  $("progressText").textContent=`${picked}/7 · STACKS ${stacks}/3`;
+  $("progressBar").style.width=(picked/7*100)+"%";
+  $("lives").textContent="♥ ".repeat(lives)+"♡ ".repeat(5-lives);
+}
+
+function showPanel(id) {
+  ["homeMenu","namePanel","rulesPanel","leaderPanel","settingsPanel"]
+    .forEach(p=>$(p).classList.add("hidden"));
+
+  $(id).classList.remove("hidden");
+}
+
+function startGame() {
+  score=0;
+  timeLeft=90;
+  lives=5;
+  stacks=0;
+  stonesDown=false;
+  paused=false;
+  running=true;
+  cooldown=0;
+  chaseTime=0;
+
+  player.x=245;
+  player.y=395;
+
+  createBots();
+  resetStones();
+
+  $("overlay").classList.add("hidden");
+  showPanel("homeMenu");
+  $("homeMenu").classList.add("hidden");
+
+  message("Move close to the stack and press THROW!");
+  updateUI();
+}
+
+function endGame(win) {
+  running=false;
+
+  $("dialogTitle").textContent=win?"You Win!":"Game Over";
+  $("dialogText").textContent=`${playerName}, your final score is ${score}.`;
+  $("continueBtn").textContent="PLAY AGAIN";
+  $("overlay").classList.remove("hidden");
+
+  if(score>best) {
+    best=score;
+    localStorage.setItem("lagorizzBest",best);
+    $("bestScore").textContent=best;
+  }
+}
+
+function movePlayer(dir,dt) {
+  if(dir==="up") player.y-=PLAYER_SPEED*dt;
+  if(dir==="down") player.y+=PLAYER_SPEED*dt;
+  if(dir==="left") player.x-=PLAYER_SPEED*dt;
+  if(dir==="right") player.x+=PLAYER_SPEED*dt;
+
+  player.x=Math.max(25,Math.min(935,player.x));
+  player.y=Math.max(270,Math.min(455,player.y));
+}
+
+const keys = Object.create(null);
+
+function isTyping(e) {
+  const tag = e.target.tagName ? e.target.tagName.toLowerCase() : "";
+  return tag==="input" || tag==="textarea" || e.target.isContentEditable;
+}
+
+window.addEventListener("keydown",e=>{
+  if(isTyping(e)) return;
+
+  const k=e.key.toLowerCase();
+
+  if(["w","a","s","d","arrowup","arrowdown",
+      "arrowleft","arrowright"," "].includes(k))
+    e.preventDefault();
+
+  keys[k]=true;
+
+  if(k===" "||k==="enter") throwStone();
+  if(k==="escape") togglePause();
+});
+
+window.addEventListener("keyup",e=>{
+  if(isTyping(e)) return;
+  keys[e.key.toLowerCase()]=false;
+});
+
+window.addEventListener("blur",()=>{
+  for(const k in keys) keys[k]=false;
+});
+
+document.querySelectorAll("[data-move]").forEach(btn=>{
+  let timer=null;
+  const dir=btn.dataset.move;
+
+  function move() {
+    if(running&&!paused) movePlayer(dir,0.06);
+  }
+
+  btn.addEventListener("pointerdown",e=>{
+    e.preventDefault();
+
+    if(timer!==null) clearInterval(timer);
+
+    move();
+    timer=setInterval(move,60);
+  });
+
+  ["pointerup","pointerleave","pointercancel"].forEach(ev=>{
+    btn.addEventListener(ev,()=>{
+      if(timer!==null) clearInterval(timer);
+      timer=null;
+    });
+  });
+});
+
+function throwStone() {
+  if(!running||paused||cooldown>0) return;
+
+  cooldown=0.55;
+
+  if(!stonesDown&&Math.abs(player.x-480)<360&&
+     Math.abs(player.y-397)<130) {
+
+    stonesDown=true;
+
+    stones.forEach((s,i)=>{
+      s.picked=false;
+      s.x=350+(i%4)*75;
+      s.y=390-Math.floor(i/4)*35;
+    });
+
+    score+=100;
+    message("Great throw! Move close to each stone to collect it.");
+
+  } else {
+    message("Move closer to the stack before throwing!");
+  }
+
+  updateUI();
+}
+
+function collectStone(stone) {
+  if(stone.picked||!stonesDown) return;
+
+  stone.picked=true;
+  score+=10;
+
+  const picked=stones.filter(s=>s.picked).length;
+
+  if(picked===7) {
+    stonesDown=false;
+    stacks++;
+    score+=200;
+
+    stones.forEach((s,i)=>{
+      s.picked=false;
+      s.x=480;
+      s.y=397-i*17;
+    });
+
+    message("Amazing! You rebuilt the seven-stone stack!");
+
+    if(stacks>=3) {
+      updateUI();
+      endGame(true);
+      return;
+    }
+  } else {
+    message(`Stone collected automatically: ${picked}/7.`);
+  }
+
+  updateUI();
+}
+
+function togglePause() {
+  if(!running) return;
+
+  paused=!paused;
+
+  $("overlay").classList.toggle("hidden",!paused);
+  $("dialogTitle").textContent="Game Paused";
+  $("dialogText").textContent="Ready to continue?";
+  $("continueBtn").textContent="CONTINUE";
+}
+
+$("throwBtn").addEventListener("click",throwStone);
+$("playBtn").onclick=startGame;
+
+$("nameBtn").onclick=()=>{
+  $("playerName").value=playerName;
+  showPanel("namePanel");
+  $("playerName").focus();
+};
+
+$("saveNameBtn").onclick=()=>{
+  const entered=$("playerName").value.trim();
+
+  if(entered) playerName=entered;
+  else playerName="Player";
+
+  localStorage.setItem("lagorizzName",playerName);
+  $("leaderName").textContent=playerName;
+
+  showPanel("homeMenu");
+  message("Welcome, "+playerName+"!");
+};
+
+$("playerName").addEventListener("keydown",e=>{
+  if(e.key==="Enter") {
+    e.preventDefault();
+    $("saveNameBtn").click();
+  }
+});
+
+$("nameBack").onclick=()=>showPanel("homeMenu");
+$("restartBtn").onclick=startGame;
+$("pauseBtn").onclick=togglePause;
+
+$("continueBtn").onclick=()=>{
+  if(!running) {
+    startGame();
+    return;
+  }
+
+  paused=false;
+  $("overlay").classList.add("hidden");
+};
+
+$("homeBtn").onclick=()=>{
+  running=false;
+  paused=false;
+  $("overlay").classList.add("hidden");
+  showPanel("homeMenu");
+  message("Press PLAY GAME to start!");
+};
+
+$("rulesBtn").onclick=()=>showPanel("rulesPanel");
+$("rulesBack").onclick=()=>showPanel("homeMenu");
+
+$("leaderBtn").onclick=()=>{
+  $("bestScore").textContent=best;
+  $("leaderName").textContent=playerName;
+  showPanel("leaderPanel");
+};
+
+$("leaderBack").onclick=()=>showPanel("homeMenu");
+$("settingsBtn").onclick=()=>showPanel("settingsPanel");
+
+$("settingsBack").onclick=()=>{
+  difficulty=$("difficulty").value;
+
+  const names={
+    easy:"EASY",
+    medium:"MEDIUM",
+    hard:"HARD"
+  };
+
+  $("difficultyBadge").textContent="✦ "+names[difficulty];
+
+  createBots();
+  showPanel("homeMenu");
+
+  message(
+    difficulty==="easy" ? "Easy: 1 extremely slow bot." :
+    difficulty==="medium" ? "Medium: 2 slow bots." :
+    "Hard: 3 medium-speed bots."
+  );
+};
+
+function roundedRect(x,y,w,h,r,fill,stroke) {
+  ctx.beginPath();
+  ctx.roundRect(x,y,w,h,r);
+  ctx.fillStyle=fill;
+  ctx.fill();
+
+  if(stroke) {
+    ctx.lineWidth=4;
+    ctx.strokeStyle=stroke;
+    ctx.stroke();
+  }
+}
+
+function drawBackground() {
+  const g=ctx.createLinearGradient(0,0,0,H);
+
+  g.addColorStop(0,"#8bd8e7");
+  g.addColorStop(0.5,"#ffd38a");
+  g.addColorStop(1,"#ff9b83");
+
+  ctx.fillStyle=g;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.fillStyle="#ffd05b";
+  ctx.beginPath();
+  ctx.arc(820,95,39,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.strokeStyle="#171923";
+  ctx.lineWidth=4;
+  ctx.stroke();
+
+  ctx.fillStyle="#9460bf";
+  ctx.beginPath();
+  ctx.moveTo(0,390);
+  ctx.quadraticCurveTo(110,325,230,380);
+  ctx.quadraticCurveTo(340,420,455,376);
+  ctx.quadraticCurveTo(560,333,670,385);
+  ctx.quadraticCurveTo(825,420,960,360);
+  ctx.lineTo(960,540);
+  ctx.lineTo(0,540);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.fillStyle="#f68d83";
+  ctx.fillRect(0,445,960,95);
+
+  for(let i=0;i<70;i++) {
+    const x=(i*137)%960;
+    const y=455+(i*47)%78;
+
+    ctx.fillStyle=i%3===0?"#fff2b8":"#d65f7e";
+    ctx.beginPath();
+    ctx.arc(x,y,2.3,0,Math.PI*2);
+    ctx.fill();
+  }
+}
+
+function drawStones() {
+  stones.forEach(s=>{
+    if(stonesDown&&s.picked) return;
+
+    roundedRect(
+      s.x-s.w/2,s.y,s.w,s.h,4,s.color,"#171923"
+    );
+  });
+}
+
+function drawPerson(p,label) {
+  ctx.fillStyle="#17192335";
+  ctx.beginPath();
+  ctx.ellipse(p.x,p.y+22,20,6,0,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.strokeStyle="#171923";
+  ctx.lineWidth=5;
+  ctx.lineCap="round";
+  ctx.beginPath();
+  ctx.moveTo(p.x-5,p.y+10);
+  ctx.lineTo(p.x-8,p.y+23);
+  ctx.moveTo(p.x+5,p.y+10);
+  ctx.lineTo(p.x+9,p.y+23);
+  ctx.stroke();
+
+  roundedRect(p.x-11,p.y-4,22,24,7,p.color,"#171923");
+
+  ctx.fillStyle="#ffd3a3";
+  ctx.beginPath();
+  ctx.arc(p.x,p.y-14,10,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.strokeStyle="#171923";
+  ctx.lineWidth=3;
+  ctx.stroke();
+
+  ctx.fillStyle="#171923";
+  ctx.beginPath();
+  ctx.arc(p.x-3,p.y-15,1.6,0,Math.PI*2);
+  ctx.arc(p.x+3,p.y-15,1.6,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.font="bold 12px Arial";
+  ctx.textAlign="center";
+  ctx.fillStyle="#171923";
+  ctx.fillText(label,p.x,p.y-34);
+}
+
+function draw() {
+  drawBackground();
+  drawStones();
+
+  drawPerson(player,playerName.toUpperCase());
+  bots.forEach(bot=>drawPerson(bot,bot.name));
+
+  if(paused||!running) {
+    ctx.fillStyle="#17192324";
+    ctx.fillRect(0,0,W,H);
+  }
+}
+
+function update(dt) {
+  if(!running||paused) return;
+
+  timeLeft-=dt;
+  cooldown=Math.max(0,cooldown-dt);
+
+  if(timeLeft<=0) {
+    timeLeft=0;
+    updateUI();
+    endGame(false);
+    return;
+  }
+
+  if(keys.w||keys.arrowup) movePlayer("up",dt);
+  if(keys.s||keys.arrowdown) movePlayer("down",dt);
+  if(keys.a||keys.arrowleft) movePlayer("left",dt);
+  if(keys.d||keys.arrowright) movePlayer("right",dt);
+
+  if(stonesDown) {
+    for(const stone of stones) {
+      if(!stone.picked &&
+         Math.hypot(player.x-stone.x,player.y-stone.y)<34) {
+        collectStone(stone);
+        if(!running) return;
+      }
+    }
+  }
+
+  // NEW BOT AI:
+  // Bots weave around the player along different curved paths.
+  // Original bot speed settings are unchanged.
+  chaseTime += dt;
+
+  for(let i=0;i<bots.length;i++) {
+    const bot=bots[i];
+
+    const phase=chaseTime*1.8+i*2.1;
+
+    const targetX=player.x+Math.sin(phase)*90;
+    const targetY=player.y+Math.cos(phase*0.8)*45;
+
+    const dx=targetX-bot.x;
+    const dy=targetY-bot.y;
+    const dist=Math.hypot(dx,dy)||1;
+
+    // Preserve the original configured speed and multiplier.
+    bot.x+=(dx/dist)*bot.speed*dt;
+    bot.y+=(dy/dist)*bot.speed*0.65*dt;
+
+    bot.x=Math.max(25,Math.min(935,bot.x));
+    bot.y=Math.max(270,Math.min(455,bot.y));
+
+    // Collision remains based on the player's actual position.
+    const playerDist=Math.hypot(
+      player.x-bot.x,
+      player.y-bot.y
+    );
+
+    if(playerDist<34&&bot.cooldown<=0) {
+      lives--;
+      bot.cooldown=1.7;
+
+      player.x=245;
+      player.y=395;
+
+      score=Math.max(0,score-25);
+      message(`${bot.name} tagged you! Keep moving!`);
+      updateUI();
+
+      if(lives<=0) {
+        endGame(false);
+        return;
+      }
+    }
+
+    bot.cooldown=Math.max(0,bot.cooldown-dt);
+  }
+
+  updateUI();
+}
+
+let previous=performance.now();
+
+function loop(now) {
+  const dt=Math.min(0.035,(now-previous)/1000);
+  previous=now;
+
+  update(dt);
+  draw();
+
+  requestAnimationFrame(loop);
+}
+
+createBots();
+updateUI();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
