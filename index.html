@@ -13,7 +13,17 @@
   --yellow:#ffb900;
   --teal:#4bc8c2;
 }
-* { box-sizing:border-box; }
+
+* {
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html, body {
+  -webkit-user-select:none;
+  user-select:none;
+}
+
 body {
   margin:0;
   padding:12px;
@@ -21,72 +31,159 @@ body {
   color:var(--ink);
   background:linear-gradient(150deg,#ffc879,#ff9d86,#f16c91);
 }
+
 .app { width:min(100%,1000px);margin:auto; }
 .brand { display:flex;align-items:center;gap:12px;margin-bottom:15px; }
+
 .logo {
   flex-shrink:0;width:45px;height:45px;
   border:3px solid var(--ink);border-radius:50%;
   background:#ffb83f;box-shadow:3px 3px var(--ink);
 }
+
 h1 { margin:0;font-size:clamp(28px,6vw,42px); }
 .subtitle { margin:5px 0;font-size:12px;font-weight:bold; }
-.layout { display:grid;grid-template-columns:230px minmax(0,1fr);gap:14px; }
+
+.layout {
+  display:grid;
+  grid-template-columns:230px minmax(0,1fr);
+  gap:14px;
+}
+
 .panel {
   padding:12px;margin-bottom:14px;background:#fff9ed;
   border:3px solid var(--ink);border-radius:18px;
   box-shadow:4px 5px var(--ink);min-width:0;
 }
+
 .menu { display:grid;gap:10px; }
+
 button {
   padding:11px;color:var(--ink);background:white;
   border:3px solid var(--ink);border-radius:999px;
   box-shadow:2px 3px var(--ink);font-weight:900;
-  cursor:pointer;touch-action:manipulation;
+  cursor:pointer;
+  touch-action:manipulation;
+
+  /* Stop mobile text selection and long-press selection menus */
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;
 }
+
 button:active { transform:translate(2px,3px);box-shadow:none; }
+
 .bigbtn { width:100%;background:var(--coral); }
 .menu button:nth-child(2) { background:var(--teal); }
 .menu button:nth-child(3) { background:var(--yellow); }
 .menu button:nth-child(4) { background:#b7a0ff; }
 .menu button:nth-child(5) { background:#ffb900; }
-.stats { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px; }
+
+.stats {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;
+}
+
 .pill {
   padding:8px 3px;background:white;border:2px solid var(--ink);
   border-radius:30px;text-align:center;font-size:12px;font-weight:bold;
   overflow-wrap:anywhere;
 }
+
 .lives { margin:10px 0;color:var(--coral);font-size:22px; }
-.actions { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:12px; }
+
+.actions {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:6px;margin-bottom:12px;
+}
+
 .actions button { padding:9px 3px;font-size:11px; }
-.progress-label { display:flex;justify-content:space-between;gap:5px;margin-bottom:5px;font-size:11px;font-weight:bold; }
-.progress { height:12px;margin-bottom:10px;overflow:hidden;border:2px solid var(--ink);border-radius:20px; }
+
+.progress-label {
+  display:flex;justify-content:space-between;gap:5px;
+  margin-bottom:5px;font-size:11px;font-weight:bold;
+}
+
+.progress {
+  height:12px;margin-bottom:10px;overflow:hidden;
+  border:2px solid var(--ink);border-radius:20px;
+}
+
 .progress span { display:block;width:0;height:100%;background:var(--teal); }
-.canvas-wrap { width:100%;overflow:hidden;border:4px solid var(--ink);border-radius:16px; }
-canvas { display:block;width:100%;height:auto; }
+
+.canvas-wrap {
+  width:100%;overflow:hidden;
+  border:4px solid var(--ink);border-radius:16px;
+}
+
+canvas {
+  display:block;width:100%;height:auto;
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+  touch-action:pan-y;
+}
+
 .message { min-height:18px;text-align:center;font-size:12px;font-weight:bold; }
+
 .below { display:grid;grid-template-columns:1fr 1fr;gap:10px; }
-.pad { display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:220px;margin:auto; }
-.control { min-height:44px;border-radius:12px;font-size:19px; }
+
+.pad {
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:6px;max-width:220px;margin:auto;
+}
+
+.control {
+  min-height:44px;border-radius:12px;font-size:19px;
+  -webkit-user-select:none;
+  user-select:none;
+  -webkit-touch-callout:none;
+  touch-action:none;
+}
+
 .blank { visibility:hidden; }
-.gameButtons { display:flex;justify-content:center;align-items:center;gap:10px; }
-.throw { width:78px;height:78px;padding:5px;border-radius:50%;font-size:13px;background:var(--coral); }
+
+.gameButtons {
+  display:flex;justify-content:center;align-items:center;gap:10px;
+}
+
+.throw {
+  width:78px;height:78px;padding:5px;border-radius:50%;
+  font-size:13px;background:var(--coral);
+}
+
 .help { text-align:center;font-size:11px;font-weight:bold; }
-.footer { padding:12px;background:#242b3b;color:white;border-radius:12px;text-align:center;font-size:11px; }
+
+.footer {
+  padding:12px;background:#242b3b;color:white;
+  border-radius:12px;text-align:center;font-size:11px;
+}
+
 .hidden { display:none!important; }
+
 input,select { max-width:100%;font-size:16px; }
+
 .nameInput {
   width:100%;padding:12px;margin:8px 0 12px;
   border:2px solid var(--ink);border-radius:10px;
+  -webkit-user-select:text;
+  user-select:text;
 }
+
 #overlay {
   position:fixed;inset:0;z-index:5;display:grid;
   place-items:center;padding:16px;background:#171923bb;
 }
+
 .dialog {
   width:min(100%,350px);padding:20px;background:#fff9ed;
   border:3px solid var(--ink);border-radius:20px;
   box-shadow:4px 5px var(--ink);text-align:center;
 }
+
 @media(max-width:650px) {
   body { padding:8px; }
   .layout { grid-template-columns:minmax(0,1fr); }
@@ -99,6 +196,7 @@ input,select { max-width:100%;font-size:16px; }
   .lives { font-size:20px; }
   .actions button { font-size:10px; }
 }
+
 @media(max-width:360px) {
   .below { grid-template-columns:1fr; }
   .menu { grid-template-columns:1fr 1fr; }
@@ -110,6 +208,7 @@ input,select { max-width:100%;font-size:16px; }
 
 <body>
 <div class="app">
+
 <header class="brand">
   <div class="logo"></div>
   <div>
@@ -119,6 +218,7 @@ input,select { max-width:100%;font-size:16px; }
 </header>
 
 <div class="layout">
+
 <aside>
   <section class="panel menu" id="homeMenu">
     <button class="bigbtn" id="playBtn">▷ PLAY GAME</button>
@@ -175,20 +275,26 @@ input,select { max-width:100%;font-size:16px; }
     <div class="pill">⭐ <span id="score">0</span></div>
     <div class="pill">◷ <span id="time">90</span>s</div>
   </div>
+
   <div class="lives" id="lives">♥ ♥ ♥ ♥ ♥</div>
+
   <div class="actions">
     <button id="pauseBtn">Ⅱ PAUSE</button>
     <button id="restartBtn" style="background:#ffb900">⟳ RESTART</button>
     <button id="homeBtn">⌂ HOME</button>
   </div>
+
   <div class="progress-label">
     <span>Rebuild Progress</span>
     <span id="progressText">0/7 · STACKS 0/3</span>
   </div>
+
   <div class="progress"><span id="progressBar"></span></div>
+
   <div class="canvas-wrap">
     <canvas id="game" width="960" height="540"></canvas>
   </div>
+
   <p class="message" id="message">Choose a difficulty and press PLAY GAME!</p>
 </section>
 
@@ -204,6 +310,7 @@ input,select { max-width:100%;font-size:16px; }
     </div>
     <p class="help">Move: WASD / arrows</p>
   </div>
+
   <div>
     <div class="gameButtons">
       <button class="control throw" id="throwBtn">➤<br>THROW</button>
@@ -230,6 +337,21 @@ const canvas = $("game");
 const ctx = canvas.getContext("2d");
 const W = canvas.width, H = canvas.height;
 
+/* Prevent the mobile copy/select menu on game controls */
+document.querySelectorAll("button, canvas").forEach(element => {
+  element.addEventListener("contextmenu", event => {
+    event.preventDefault();
+  });
+
+  element.addEventListener("selectstart", event => {
+    event.preventDefault();
+  });
+
+  element.addEventListener("dragstart", event => {
+    event.preventDefault();
+  });
+});
+
 let playerName = localStorage.getItem("lagorizzName") || "Player";
 $("playerName").value = playerName;
 $("leaderName").textContent = playerName;
@@ -240,6 +362,7 @@ let chaseTime = 0;
 let score = 0, timeLeft = 90, lives = 5, stacks = 0;
 let stonesDown = false, cooldown = 0, difficulty = "easy";
 let best = Number(localStorage.getItem("lagorizzBest") || 0);
+
 $("bestScore").textContent = best;
 
 const player = {x:245,y:395,color:"#21d7d0"};
@@ -408,7 +531,7 @@ document.querySelectorAll("[data-move]").forEach(btn=>{
     timer=setInterval(move,60);
   });
 
-  ["pointerup","pointerleave","pointercancel"].forEach(ev=>{
+  ["pointerup","pointerleave","pointercancel","lostpointercapture"].forEach(ev=>{
     btn.addEventListener(ev,()=>{
       if(timer!==null) clearInterval(timer);
       timer=null;
@@ -718,9 +841,6 @@ function update(dt) {
     }
   }
 
-  // NEW BOT AI:
-  // Bots weave around the player along different curved paths.
-  // Original bot speed settings are unchanged.
   chaseTime += dt;
 
   for(let i=0;i<bots.length;i++) {
@@ -735,14 +855,12 @@ function update(dt) {
     const dy=targetY-bot.y;
     const dist=Math.hypot(dx,dy)||1;
 
-    // Preserve the original configured speed and multiplier.
     bot.x+=(dx/dist)*bot.speed*dt;
     bot.y+=(dy/dist)*bot.speed*0.65*dt;
 
     bot.x=Math.max(25,Math.min(935,bot.x));
     bot.y=Math.max(270,Math.min(455,bot.y));
 
-    // Collision remains based on the player's actual position.
     const playerDist=Math.hypot(
       player.x-bot.x,
       player.y-bot.y
